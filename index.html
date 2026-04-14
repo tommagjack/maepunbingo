@@ -1,523 +1,507 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="th">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="2685.5">
-  <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบขานเลขบิงโกอัตโนมัติ (Bingo Caller)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #111827;
+            --text-main: #f9fafb;
+            --text-muted: #9ca3af;
+            --card-bg: #1f2937;
+            --green-active: #4ade80;
+            --green-dark: #064e3b;
+            --btn-start: #3b82f6;
+            --btn-stop: #ef4444;
+            --btn-reset: #f59e0b;
+            --btn-full: #8b5cf6;
+            --btn-bingo: #ec4899;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Kanit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* Header & Main Display */
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 1000px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--green-active);
+        }
+
+        .number-display {
+            background-color: var(--card-bg);
+            width: 100%;
+            max-width: 600px;
+            border-radius: 24px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            border: 4px solid #374151;
+            transition: all 0.3s ease;
+        }
+
+        .number-display.active {
+            border-color: var(--green-active);
+            box-shadow: 0 0 40px rgba(74, 222, 128, 0.3);
+        }
+
+        .current-number {
+            font-size: 160px;
+            font-weight: 800;
+            line-height: 1;
+            color: var(--green-active);
+            text-shadow: 0 0 20px rgba(74, 222, 128, 0.5);
+        }
+
+        .counter {
+            font-size: 20px;
+            color: var(--text-muted);
+            margin-top: 15px;
+            font-weight: 600;
+        }
+
+        .subtitle {
+            font-size: 24px;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        /* Controls */
+        .controls-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 30px;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        .btn {
+            font-size: 24px;
+            font-weight: 600;
+            padding: 15px 35px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-start { background-color: var(--btn-start); color: white; }
+        .btn-stop { background-color: var(--btn-stop); color: white; }
+        .btn-reset { background-color: var(--btn-reset); color: white; }
+        .btn-full { background-color: var(--btn-full); color: white; }
+        .btn-bingo { background-color: var(--btn-bingo); color: white; }
+
+        .btn-start:hover:not(:disabled) { background-color: #2563eb; }
+        .btn-stop:hover:not(:disabled) { background-color: #dc2626; }
+        .btn-reset:hover:not(:disabled) { background-color: #d97706; }
+        .btn-full:hover { background-color: #7c3aed; }
+        .btn-bingo:hover:not(:disabled) { background-color: #db2777; }
+
+        /* Header Controls & Speed */
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .speed-controls {
+            background-color: var(--card-bg);
+            padding: 8px 15px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .speed-label {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .btn-speed {
+            font-size: 16px;
+            padding: 6px 15px;
+            background-color: #374151;
+            color: white;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-speed.active {
+            background-color: var(--green-active);
+            color: var(--green-dark);
+            border-color: white;
+            font-weight: 800;
+        }
+
+        /* Adjust btn-full for header */
+        .btn-full {
+            font-size: 18px;
+            padding: 10px 20px;
+        }
+
+        /* Bingo Grid */
+        .grid-container {
+            width: 100%;
+            max-width: 1200px;
+            background-color: var(--card-bg);
+            padding: 25px;
+            border-radius: 20px;
+        }
+
+        .bingo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(65px, 1fr));
+            gap: 12px;
+        }
+
+        .cell {
+            aspect-ratio: 1;
+            background-color: #374151;
+            color: var(--text-muted);
+            font-size: 28px;
+            font-weight: 600;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .cell.called {
+            background-color: var(--green-active);
+            color: var(--green-dark);
+            font-weight: 800;
+            box-shadow: 0 0 15px rgba(74, 222, 128, 0.4);
+            transform: scale(1.05);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .current-number { font-size: 120px; }
+            .btn { font-size: 20px; padding: 12px 25px; }
+            .btn-full { font-size: 16px; padding: 10px 15px; width: 100%; justify-content: center; }
+            .cell { font-size: 22px; }
+            .bingo-grid { grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); }
+            .header { flex-direction: column; gap: 15px; }
+            .header-controls { flex-direction: column; gap: 10px; width: 100%; }
+            .speed-controls { width: 100%; justify-content: center; }
+        }
+    </style>
 </head>
 <body>
-<p class="p1">&lt;!DOCTYPE html&gt;</p>
-<p class="p1">&lt;html lang="th"&gt;</p>
-<p class="p1">&lt;head&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta charset="UTF-8"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;title&gt;บิงโกแม่ปัน&lt;/title&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;800&amp;display=swap" rel="stylesheet"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;style&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>:root {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>--bg-color: #111827;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>--text-main: #f9fafb;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>--text-muted: #9ca3af;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>--card-bg: #1f2937;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>--green-active: #4ade80;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>--green-dark: #064e3b;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>--btn-start: #3b82f6;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>--btn-stop: #ef4444;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>--btn-reset: #f59e0b;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>--btn-full: #8b5cf6;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>--btn-bingo: #ec4899;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>* {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>box-sizing: border-box;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin: 0;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 0;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-family: 'Kanit', sans-serif;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>body {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background-color: var(--bg-color);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: var(--text-main);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>min-height: 100vh;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: flex;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>flex-direction: column;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>align-items: center;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 20px;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>/* Header &amp; Main Display */</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.header {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>text-align: center;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 20px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>width: 100%;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>max-width: 1000px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: flex;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>justify-content: space-between;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>align-items: center;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>h1 {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 32px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 800;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: var(--green-active);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.number-display {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background-color: var(--card-bg);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>width: 100%;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>max-width: 600px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 24px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 40px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>text-align: center;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 30px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 10px 25px rgba(0,0,0,0.5);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border: 4px solid #374151;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>transition: all 0.3s ease;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.number-display.active {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-color: var(--green-active);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 0 40px rgba(74, 222, 128, 0.3);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.current-number {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 160px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 800;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>line-height: 1;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: var(--green-active);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>text-shadow: 0 0 20px rgba(74, 222, 128, 0.5);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.counter {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 20px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: var(--text-muted);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-top: 15px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 600;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.subtitle {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 24px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: var(--text-muted);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 10px;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>/* Controls */</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.controls-container {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: flex;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>flex-wrap: wrap;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>gap: 15px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>justify-content: center;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 30px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>width: 100%;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>max-width: 1000px;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.btn {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 24px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 600;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 15px 35px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border: none;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 12px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>cursor: pointer;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>transition: all 0.2s;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: flex;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>align-items: center;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>gap: 10px;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.btn:active {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>transform: scale(0.95);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.btn:disabled {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>opacity: 0.5;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>cursor: not-allowed;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>transform: none;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.btn-start { background-color: var(--btn-start); color: white; }</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.btn-stop { background-color: var(--btn-stop); color: white; }</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.btn-reset { background-color: var(--btn-reset); color: white; }</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.btn-full { background-color: var(--btn-full); color: white; }</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.btn-bingo { background-color: var(--btn-bingo); color: white; }</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.btn-start:hover:not(:disabled) { background-color: #2563eb; }</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.btn-stop:hover:not(:disabled) { background-color: #dc2626; }</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.btn-reset:hover:not(:disabled) { background-color: #d97706; }</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.btn-full:hover { background-color: #7c3aed; }</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.btn-bingo:hover:not(:disabled) { background-color: #db2777; }</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>/* Header Controls &amp; Speed */</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.header-controls {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: flex;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>align-items: center;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>gap: 15px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>flex-wrap: wrap;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>justify-content: center;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.speed-controls {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background-color: var(--card-bg);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 8px 15px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 12px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: flex;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>align-items: center;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>gap: 10px;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.speed-label {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 16px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 600;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: var(--text-main);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.btn-speed {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 16px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 6px 15px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background-color: #374151;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: white;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border: 2px solid transparent;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 8px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>cursor: pointer;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>transition: 0.2s;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.btn-speed.active {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background-color: var(--green-active);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: var(--green-dark);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-color: white;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 800;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>/* Adjust btn-full for header */</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.btn-full {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 18px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 10px 20px;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>/* Bingo Grid */</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.grid-container {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>width: 100%;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>max-width: 1200px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background-color: var(--card-bg);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 25px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 20px;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.bingo-grid {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: grid;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>grid-template-columns: repeat(auto-fit, minmax(65px, 1fr));</p>
-<p class="p1"><span class="Apple-converted-space">            </span>gap: 12px;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.cell {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>aspect-ratio: 1;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background-color: #374151;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: var(--text-muted);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 28px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 600;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 12px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: flex;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>align-items: center;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>justify-content: center;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>transition: all 0.3s;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.cell.called {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background-color: var(--green-active);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: var(--green-dark);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 800;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 0 15px rgba(74, 222, 128, 0.4);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>transform: scale(1.05);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>/* Responsive Design */</p>
-<p class="p1"><span class="Apple-converted-space">        </span>@media (max-width: 768px) {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>.current-number { font-size: 120px; }</p>
-<p class="p1"><span class="Apple-converted-space">            </span>.btn { font-size: 20px; padding: 12px 25px; }</p>
-<p class="p1"><span class="Apple-converted-space">            </span>.btn-full { font-size: 16px; padding: 10px 15px; width: 100%; justify-content: center; }</p>
-<p class="p1"><span class="Apple-converted-space">            </span>.cell { font-size: 22px; }</p>
-<p class="p1"><span class="Apple-converted-space">            </span>.bingo-grid { grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); }</p>
-<p class="p1"><span class="Apple-converted-space">            </span>.header { flex-direction: column; gap: 15px; }</p>
-<p class="p1"><span class="Apple-converted-space">            </span>.header-controls { flex-direction: column; gap: 10px; width: 100%; }</p>
-<p class="p1"><span class="Apple-converted-space">            </span>.speed-controls { width: 100%; justify-content: center; }</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/style&gt;</p>
-<p class="p1">&lt;/head&gt;</p>
-<p class="p1">&lt;body&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="header"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;h1&gt;เกมบิงโก (1-75)&lt;/h1&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="header-controls"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="speed-controls"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;span class="speed-label"&gt;ความเร็ว:&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;button class="btn-speed" id="speed-slow" onclick="setSpeed('slow')"&gt;ช้า&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;button class="btn-speed active" id="speed-normal" onclick="setSpeed('normal')"&gt;ปกติ&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;button class="btn-speed" id="speed-fast" onclick="setSpeed('fast')"&gt;เร็ว&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;button class="btn btn-full" onclick="toggleFullscreen()"&gt;เต็มจอ&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="number-display" id="display-card"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="subtitle"&gt;หมายเลขที่ออก&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="current-number" id="current-number"&gt;-&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="counter" id="number-counter"&gt;ออกแล้ว 0 / 75&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="controls-container"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;button class="btn btn-start" id="btn-start" onclick="startAuto()"&gt;▶ เริ่มอัตโนมัติ&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;button class="btn btn-stop" id="btn-stop" onclick="stopBingo()" disabled&gt;⏸ หยุด&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;button class="btn btn-reset" id="btn-reset" onclick="resetBingo()"&gt;↺ เริ่มรอบใหม่&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;button class="btn btn-bingo" id="btn-bingo" onclick="announceBingo()" disabled&gt;🎉 บิงโก!&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="grid-container"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="bingo-grid" id="bingo-grid"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;!-- Grid cells generated by JS --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;script&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>// State Management</p>
-<p class="p1"><span class="Apple-converted-space">        </span>let availableNumbers = [];</p>
-<p class="p1"><span class="Apple-converted-space">        </span>let calledNumbers = [];</p>
-<p class="p1"><span class="Apple-converted-space">        </span>let isPlaying = false;</p>
-<p class="p2"><span class="Apple-converted-space">        </span></p>
-<p class="p1"><span class="Apple-converted-space">        </span>// Settings</p>
-<p class="p1"><span class="Apple-converted-space">        </span>const MAX_NUMBER = 75;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>const SPEEDS = {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>slow: { delay: 3500, rate: 0.65 },</p>
-<p class="p1"><span class="Apple-converted-space">            </span>normal: { delay: 2000, rate: 0.75 },</p>
-<p class="p1"><span class="Apple-converted-space">            </span>fast: { delay: 1000, rate: 0.9 }</p>
-<p class="p1"><span class="Apple-converted-space">        </span>};</p>
-<p class="p1"><span class="Apple-converted-space">        </span>let currentSpeed = SPEEDS.normal;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>// Async controls</p>
-<p class="p1"><span class="Apple-converted-space">        </span>let timeoutId = null;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>let resolveSleep = null;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>let currentUtterance = null;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>// Initialize App</p>
-<p class="p1"><span class="Apple-converted-space">        </span>function init() {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>resetBingo();</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>// Convert Number to Thai Words</p>
-<p class="p1"><span class="Apple-converted-space">        </span>function numberToThai(num) {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const units = ["", "หนึ่ง", "สอง", "สาม", "สี่", "ห้า", "หก", "เจ็ด", "แปด", "เก้า"];</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const tens = ["", "สิบ", "ยี่สิบ", "สามสิบ", "สี่สิบ", "ห้าสิบ", "หกสิบ", "เจ็ดสิบ", "แปดสิบ", "เก้าสิบ"];</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (num &lt; 10) return units[num];</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>const tenDigit = Math.floor(num / 10);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const unitDigit = num % 10;</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>let text = tens[tenDigit];</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (unitDigit === 1) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>text += "เอ็ด";</p>
-<p class="p1"><span class="Apple-converted-space">            </span>} else if (unitDigit &gt; 1) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>text += units[unitDigit];</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (num === 10) return "สิบ";</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>return text;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>// Setup Grid UI</p>
-<p class="p1"><span class="Apple-converted-space">        </span>function renderGrid() {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const grid = document.getElementById('bingo-grid');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>grid.innerHTML = '';</p>
-<p class="p1"><span class="Apple-converted-space">            </span>for (let i = 1; i &lt;= MAX_NUMBER; i++) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const cell = document.createElement('div');</p>
-<p class="p1"><span class="Apple-converted-space">                </span>cell.className = 'cell';</p>
-<p class="p1"><span class="Apple-converted-space">                </span>cell.id = `cell-${i}`;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>cell.innerText = i;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (calledNumbers.includes(i)) {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>cell.classList.add('called');</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}</p>
-<p class="p1"><span class="Apple-converted-space">                </span>grid.appendChild(cell);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>// Update Counter UI</p>
-<p class="p1"><span class="Apple-converted-space">        </span>function updateCounter() {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('number-counter').innerText = `ออกแล้ว ${calledNumbers.length} / ${MAX_NUMBER}`;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>// Update Buttons UI</p>
-<p class="p1"><span class="Apple-converted-space">        </span>function updateUI() {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('btn-start').disabled = isPlaying || availableNumbers.length === 0;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('btn-stop').disabled = !isPlaying;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('btn-bingo').disabled = calledNumbers.length === 0;</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>const displayCard = document.getElementById('display-card');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (isPlaying) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>displayCard.classList.add('active');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>} else {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>displayCard.classList.remove('active');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>// Set Speech Speed</p>
-<p class="p1"><span class="Apple-converted-space">        </span>function setSpeed(type) {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>currentSpeed = SPEEDS[type];</p>
-<p class="p1"><span class="Apple-converted-space">            </span>document.querySelectorAll('.btn-speed').forEach(btn =&gt; btn.classList.remove('active'));</p>
-<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById(`speed-${type}`).classList.add('active');</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>// Promise-based sleep function (cancellable)</p>
-<p class="p1"><span class="Apple-converted-space">        </span>function sleep(ms) {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>return new Promise(resolve =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>resolveSleep = resolve;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>timeoutId = setTimeout(() =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>resolveSleep = null;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>resolve();</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}, ms);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>});</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>function cancelSleep() {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (timeoutId) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>clearTimeout(timeoutId);</p>
-<p class="p1"><span class="Apple-converted-space">                </span>timeoutId = null;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (resolveSleep) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>resolveSleep();</p>
-<p class="p1"><span class="Apple-converted-space">                </span>resolveSleep = null;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>// Promise-based Speech function</p>
-<p class="p1"><span class="Apple-converted-space">        </span>function speak(text, rate) {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>return new Promise(resolve =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (!('speechSynthesis' in window)) {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>return resolve();</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">                </span>window.speechSynthesis.cancel(); // Cancel ongoing speech</p>
-<p class="p2"><span class="Apple-converted-space">                </span></p>
-<p class="p1"><span class="Apple-converted-space">                </span>currentUtterance = new SpeechSynthesisUtterance(text);</p>
-<p class="p1"><span class="Apple-converted-space">                </span>currentUtterance.lang = 'th-TH';</p>
-<p class="p1"><span class="Apple-converted-space">                </span>currentUtterance.rate = rate;</p>
-<p class="p2"><span class="Apple-converted-space">                </span></p>
-<p class="p1"><span class="Apple-converted-space">                </span>currentUtterance.onend = () =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>currentUtterance = null;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>resolve();</p>
-<p class="p1"><span class="Apple-converted-space">                </span>};</p>
-<p class="p2"><span class="Apple-converted-space">                </span></p>
-<p class="p1"><span class="Apple-converted-space">                </span>currentUtterance.onerror = () =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>currentUtterance = null;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>resolve();</p>
-<p class="p1"><span class="Apple-converted-space">                </span>};</p>
-<p class="p2"><span class="Apple-converted-space">                </span></p>
-<p class="p1"><span class="Apple-converted-space">                </span>window.speechSynthesis.speak(currentUtterance);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>});</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>// Main Loop</p>
-<p class="p1"><span class="Apple-converted-space">        </span>async function startAuto() {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (isPlaying || availableNumbers.length === 0) return;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>isPlaying = true;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>updateUI();</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>// Wake up speech engine (browser requirement)</p>
-<p class="p1"><span class="Apple-converted-space">            </span>if ('speechSynthesis' in window) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>window.speechSynthesis.resume();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>while (isPlaying &amp;&amp; availableNumbers.length &gt; 0) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>// Randomly pick a number</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const randIndex = Math.floor(Math.random() * availableNumbers.length);</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const num = availableNumbers.splice(randIndex, 1)[0];</p>
-<p class="p1"><span class="Apple-converted-space">                </span>calledNumbers.push(num);</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">                </span>// Update UI state inside loop so buttons like Bingo become active</p>
-<p class="p1"><span class="Apple-converted-space">                </span>updateCounter();</p>
-<p class="p1"><span class="Apple-converted-space">                </span>updateUI();</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">                </span>// Update Display</p>
-<p class="p1"><span class="Apple-converted-space">                </span>document.getElementById('current-number').innerText = num;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const cell = document.getElementById(`cell-${num}`);</p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (cell) cell.classList.add('called');</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">                </span>// Prepare Thai Speech</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const thaiWord = numberToThai(num);</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const textToSpeak = `เลข ${thaiWord} ... ย้ำอีกครั้ง เลข ${thaiWord}`;<span class="Apple-converted-space"> </span></p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">                </span>// Speak and await completion</p>
-<p class="p1"><span class="Apple-converted-space">                </span>await speak(textToSpeak, currentSpeed.rate);</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">                </span>// Check if stopped during speech</p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (!isPlaying) break;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">                </span>// Wait based on speed setting</p>
-<p class="p1"><span class="Apple-converted-space">                </span>await sleep(currentSpeed.delay);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>// End of game</p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (availableNumbers.length === 0) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>isPlaying = false;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>document.getElementById('current-number').innerText = "จบเกม";</p>
-<p class="p1"><span class="Apple-converted-space">                </span>await speak("จบเกมบิงโกแล้วครับ", currentSpeed.rate);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">            </span>updateUI();</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>// Stop functionality</p>
-<p class="p1"><span class="Apple-converted-space">        </span>function stopBingo() {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>isPlaying = false;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>if ('speechSynthesis' in window) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>window.speechSynthesis.cancel();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">            </span>cancelSleep();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>updateUI();</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>// Reset functionality</p>
-<p class="p1"><span class="Apple-converted-space">        </span>function resetBingo() {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>stopBingo();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>availableNumbers = Array.from({length: MAX_NUMBER}, (_, i) =&gt; i + 1);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>calledNumbers = [];</p>
-<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('current-number').innerText = "-";</p>
-<p class="p1"><span class="Apple-converted-space">            </span>updateCounter();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>renderGrid();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>updateUI();</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>// Announce Bingo functionality</p>
-<p class="p1"><span class="Apple-converted-space">        </span>async function announceBingo() {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>stopBingo();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('current-number').innerText = "บิงโก!";</p>
-<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('display-card').classList.add('active');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>await speak("บิงโก! บิงโก! มีผู้ชนะแล้วครับ", currentSpeed.rate);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>// Fullscreen Toggle</p>
-<p class="p1"><span class="Apple-converted-space">        </span>function toggleFullscreen() {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (!document.fullscreenElement) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>document.documentElement.requestFullscreen().catch(err =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>console.log(`Error attempting to enable fullscreen: ${err.message}`);</p>
-<p class="p1"><span class="Apple-converted-space">                </span>});</p>
-<p class="p1"><span class="Apple-converted-space">            </span>} else {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (document.exitFullscreen) {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>document.exitFullscreen();</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>// Start initialization on window load</p>
-<p class="p1"><span class="Apple-converted-space">        </span>window.onload = init;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/script&gt;</p>
-<p class="p1">&lt;/body&gt;</p>
-<p class="p1">&lt;/html&gt;</p>
+
+    <div class="header">
+        <h1>ระบบขานเลขบิงโก (1-75)</h1>
+        <div class="header-controls">
+            <div class="speed-controls">
+                <span class="speed-label">ความเร็ว:</span>
+                <button class="btn-speed" id="speed-slow" onclick="setSpeed('slow')">ช้า</button>
+                <button class="btn-speed active" id="speed-normal" onclick="setSpeed('normal')">ปกติ</button>
+                <button class="btn-speed" id="speed-fast" onclick="setSpeed('fast')">เร็ว</button>
+            </div>
+            <button class="btn btn-full" onclick="toggleFullscreen()">เต็มจอ</button>
+        </div>
+    </div>
+
+    <div class="number-display" id="display-card">
+        <div class="subtitle">หมายเลขที่ออก</div>
+        <div class="current-number" id="current-number">-</div>
+        <div class="counter" id="number-counter">ออกแล้ว 0 / 75</div>
+    </div>
+
+    <div class="controls-container">
+        <button class="btn btn-start" id="btn-start" onclick="startAuto()">▶ เริ่มอัตโนมัติ</button>
+        <button class="btn btn-stop" id="btn-stop" onclick="stopBingo()" disabled>⏸ หยุด</button>
+        <button class="btn btn-reset" id="btn-reset" onclick="resetBingo()">↺ เริ่มรอบใหม่</button>
+        <button class="btn btn-bingo" id="btn-bingo" onclick="announceBingo()" disabled>🎉 บิงโก!</button>
+    </div>
+
+    <div class="grid-container">
+        <div class="bingo-grid" id="bingo-grid">
+            <!-- Grid cells generated by JS -->
+        </div>
+    </div>
+
+    <script>
+        // State Management
+        let availableNumbers = [];
+        let calledNumbers = [];
+        let isPlaying = false;
+        
+        // Settings
+        const MAX_NUMBER = 75;
+        const SPEEDS = {
+            slow: { delay: 3500, rate: 0.65 },
+            normal: { delay: 2000, rate: 0.75 },
+            fast: { delay: 1000, rate: 0.9 }
+        };
+        let currentSpeed = SPEEDS.normal;
+
+        // Async controls
+        let timeoutId = null;
+        let resolveSleep = null;
+        let currentUtterance = null;
+
+        // Initialize App
+        function init() {
+            resetBingo();
+        }
+
+        // Convert Number to Thai Words
+        function numberToThai(num) {
+            const units = ["", "หนึ่ง", "สอง", "สาม", "สี่", "ห้า", "หก", "เจ็ด", "แปด", "เก้า"];
+            const tens = ["", "สิบ", "ยี่สิบ", "สามสิบ", "สี่สิบ", "ห้าสิบ", "หกสิบ", "เจ็ดสิบ", "แปดสิบ", "เก้าสิบ"];
+            
+            if (num < 10) return units[num];
+            
+            const tenDigit = Math.floor(num / 10);
+            const unitDigit = num % 10;
+            
+            let text = tens[tenDigit];
+            
+            if (unitDigit === 1) {
+                text += "เอ็ด";
+            } else if (unitDigit > 1) {
+                text += units[unitDigit];
+            }
+            
+            if (num === 10) return "สิบ";
+            
+            return text;
+        }
+
+        // Setup Grid UI
+        function renderGrid() {
+            const grid = document.getElementById('bingo-grid');
+            grid.innerHTML = '';
+            for (let i = 1; i <= MAX_NUMBER; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.id = `cell-${i}`;
+                cell.innerText = i;
+                if (calledNumbers.includes(i)) {
+                    cell.classList.add('called');
+                }
+                grid.appendChild(cell);
+            }
+        }
+
+        // Update Counter UI
+        function updateCounter() {
+            document.getElementById('number-counter').innerText = `ออกแล้ว ${calledNumbers.length} / ${MAX_NUMBER}`;
+        }
+
+        // Update Buttons UI
+        function updateUI() {
+            document.getElementById('btn-start').disabled = isPlaying || availableNumbers.length === 0;
+            document.getElementById('btn-stop').disabled = !isPlaying;
+            document.getElementById('btn-bingo').disabled = calledNumbers.length === 0;
+            
+            const displayCard = document.getElementById('display-card');
+            if (isPlaying) {
+                displayCard.classList.add('active');
+            } else {
+                displayCard.classList.remove('active');
+            }
+        }
+
+        // Set Speech Speed
+        function setSpeed(type) {
+            currentSpeed = SPEEDS[type];
+            document.querySelectorAll('.btn-speed').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`speed-${type}`).classList.add('active');
+        }
+
+        // Promise-based sleep function (cancellable)
+        function sleep(ms) {
+            return new Promise(resolve => {
+                resolveSleep = resolve;
+                timeoutId = setTimeout(() => {
+                    resolveSleep = null;
+                    resolve();
+                }, ms);
+            });
+        }
+
+        function cancelSleep() {
+            if (timeoutId) {
+                clearTimeout(timeoutId);
+                timeoutId = null;
+            }
+            if (resolveSleep) {
+                resolveSleep();
+                resolveSleep = null;
+            }
+        }
+
+        // Promise-based Speech function
+        function speak(text, rate) {
+            return new Promise(resolve => {
+                if (!('speechSynthesis' in window)) {
+                    return resolve();
+                }
+
+                window.speechSynthesis.cancel(); // Cancel ongoing speech
+                
+                currentUtterance = new SpeechSynthesisUtterance(text);
+                currentUtterance.lang = 'th-TH';
+                currentUtterance.rate = rate;
+                
+                currentUtterance.onend = () => {
+                    currentUtterance = null;
+                    resolve();
+                };
+                
+                currentUtterance.onerror = () => {
+                    currentUtterance = null;
+                    resolve();
+                };
+                
+                window.speechSynthesis.speak(currentUtterance);
+            });
+        }
+
+        // Main Loop
+        async function startAuto() {
+            if (isPlaying || availableNumbers.length === 0) return;
+            isPlaying = true;
+            updateUI();
+
+            // Wake up speech engine (browser requirement)
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.resume();
+            }
+
+            while (isPlaying && availableNumbers.length > 0) {
+                // Randomly pick a number
+                const randIndex = Math.floor(Math.random() * availableNumbers.length);
+                const num = availableNumbers.splice(randIndex, 1)[0];
+                calledNumbers.push(num);
+
+                // Update UI state inside loop so buttons like Bingo become active
+                updateCounter();
+                updateUI();
+
+                // Update Display
+                document.getElementById('current-number').innerText = num;
+                const cell = document.getElementById(`cell-${num}`);
+                if (cell) cell.classList.add('called');
+
+                // Prepare Thai Speech
+                const thaiWord = numberToThai(num);
+                const textToSpeak = `เลข ${thaiWord} ... ย้ำอีกครั้ง เลข ${thaiWord}`; 
+
+                // Speak and await completion
+                await speak(textToSpeak, currentSpeed.rate);
+
+                // Check if stopped during speech
+                if (!isPlaying) break;
+
+                // Wait based on speed setting
+                await sleep(currentSpeed.delay);
+            }
+
+            // End of game
+            if (availableNumbers.length === 0) {
+                isPlaying = false;
+                document.getElementById('current-number').innerText = "จบเกม";
+                await speak("จบเกมบิงโกแล้วครับ", currentSpeed.rate);
+            }
+            updateUI();
+        }
+
+        // Stop functionality
+        function stopBingo() {
+            isPlaying = false;
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
+            cancelSleep();
+            updateUI();
+        }
+
+        // Reset functionality
+        function resetBingo() {
+            stopBingo();
+            availableNumbers = Array.from({length: MAX_NUMBER}, (_, i) => i + 1);
+            calledNumbers = [];
+            document.getElementById('current-number').innerText = "-";
+            updateCounter();
+            renderGrid();
+            updateUI();
+        }
+
+        // Announce Bingo functionality
+        async function announceBingo() {
+            stopBingo();
+            document.getElementById('current-number').innerText = "บิงโก!";
+            document.getElementById('display-card').classList.add('active');
+            await speak("บิงโก! บิงโก! มีผู้ชนะแล้วครับ", currentSpeed.rate);
+        }
+
+        // Fullscreen Toggle
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log(`Error attempting to enable fullscreen: ${err.message}`);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        // Start initialization on window load
+        window.onload = init;
+    </script>
 </body>
 </html>
